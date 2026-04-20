@@ -7,10 +7,6 @@ export const getApiBaseUrl = () => {
     return 'http://127.0.0.1:8000';
   }
 
-  if (isLocalhost) {
-    return 'http://127.0.0.1:8000';
-  }
-
-  // Use relative path for production to leverage Vercel rewrites and bypass CORS
-  return '/api/backend';
+  // Use Next.js server-side proxy route – bypasses CORS completely, works on all browsers
+  return '/api/proxy';
 };
