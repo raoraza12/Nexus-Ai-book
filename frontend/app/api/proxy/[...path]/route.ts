@@ -39,16 +39,23 @@ async function handler(req: NextRequest, context: any) {
       body: body || undefined,
     });
 
-  const data = await backendResponse.json().catch(() => ({}));
+    const data = await backendResponse.json().catch(() => ({}));
 
-  return NextResponse.json(data, {
-    status: backendResponse.status,
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, Authorization",
-    },
-  });
+    return NextResponse.json(data, {
+      status: backendResponse.status,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization",
+      },
+    });
+  } catch (error: any) {
+    console.error("Proxy Error:", error);
+    return NextResponse.json(
+      { detail: `Proxy Error: ${error.message}` },
+      { status: 502 }
+    );
+  }
 }
 
 export async function GET(req: NextRequest, context: { params: Promise<{ path: string[] }> }) {
