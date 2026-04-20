@@ -5,11 +5,11 @@ export const runtime = "edge";
 export async function POST(req: NextRequest) {
   try {
     const { text, target_lang } = await req.json();
-    const apiKey = process.env.OPENAI_API_KEY;
+    const apiKey = process.env.GROQ_API_KEY;
 
     if (!apiKey) {
       return NextResponse.json(
-        { detail: "Nexus Translation Error: OPENAI_API_KEY is not configured." },
+        { detail: "Nexus Translation Error: GROQ_API_KEY is not configured on Vercel." },
         { status: 401 }
       );
     }
@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ translated_text: "" });
     }
 
-    // Map language codes to full names for better AI context
+    // Map language codes to full names
     const langMap: Record<string, string> = {
       ur: "Urdu",
       ar: "Arabic",
@@ -32,14 +32,14 @@ export async function POST(req: NextRequest) {
 
     const targetLangFull = langMap[target_lang] || target_lang;
 
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "gpt-3.5-turbo",
+        model: "llama-3.3-70b-specdec",
         messages: [
           {
             role: "system",
@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
             content: text
           }
         ],
-        temperature: 0.3,
+        temperature: 0.2,
       }),
     });
 

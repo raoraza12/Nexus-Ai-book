@@ -5,16 +5,15 @@ export const runtime = "edge";
 export async function POST(req: NextRequest) {
   try {
     const { messages, model, persona, context_depth } = await req.json();
-    const apiKey = process.env.OPENAI_API_KEY;
+    const apiKey = process.env.GROQ_API_KEY;
 
     if (!apiKey) {
       return NextResponse.json(
-        { detail: "Nexus Core Error: OPENAI_API_KEY is not configured on the server." },
+        { detail: "Nexus Core Error: GROQ_API_KEY is not configured on Vercel." },
         { status: 401 }
       );
     }
 
-    // Define Personas
     const personas: Record<string, string> = {
       academic: "You are a highly technical, academic AI mentor. Focus on engineering deep-dives, architectural integrity, and precise terminology.",
       creative: "You are a creative AI explorer. Focus on analogies, future implications, and connecting disparate concepts from the book content.",
@@ -25,7 +24,6 @@ export async function POST(req: NextRequest) {
     const systemPrompt = (personas[persona] || personas.academic) + 
       " You are the Nexus Core Intelligence. You have deep knowledge of the book content provided in the context.";
 
-    // Limit history
     const depth = context_depth || 5;
     const chatHistory = messages.slice(-(depth * 2));
     
@@ -34,16 +32,16 @@ export async function POST(req: NextRequest) {
       ...chatHistory.map((m: any) => ({ role: m.role, content: m.content }))
     ];
 
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: model || "gpt-3.5-turbo",
+        model: "llama-3.3-70b-specdec",
         messages: formattedMessages,
-        max_tokens: 600,
+        max_tokens: 1024,
         temperature: 0.7,
       }),
     });
