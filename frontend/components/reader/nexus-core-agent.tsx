@@ -163,7 +163,9 @@ User is reading this chapter and has a question: ${input}`;
                   <Sparkles size={20} className="text-white" />
                 </div>
                 <div>
-                  <h3 className="font-black text-sm uppercase italic tracking-tighter">Nexus Core</h3>
+                  <h3 className="font-black text-sm uppercase italic tracking-tighter flex items-center gap-2">
+                    Nexus Core <span className="text-[10px] bg-white/20 px-1.5 py-0.5 rounded-md not-italic">v2.0</span>
+                  </h3>
                   <div className="flex items-center gap-1.5 mt-0.5">
                     <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
                     <span className="text-[10px] font-black uppercase tracking-widest text-white/60">Neural Link Active</span>

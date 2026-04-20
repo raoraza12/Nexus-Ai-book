@@ -2,13 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 
 const BACKEND_URL = "https://nexus-ai-api.vercel.app";
 
-async function handler(req: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
-  const { path } = await params;
+async function handler(req: NextRequest, context: any) {
+  const params = await context.params;
+  const path: string[] = params.path || [];
   let pathStr = path.join("/");
   
-  // Ensure the internal /api/v1 prefix is preserved correctly
-  // If the backend expects /api/v1/... then pathStr should already have it
-  // if called as /api/proxy/api/v1/...
+  // Important: If the original URL had a trailing slash, preserve it
+  if (req.nextUrl.pathname.endsWith("/")) {
+    pathStr += "/";
+  }
   
   const targetUrl = `${BACKEND_URL}/${pathStr}`;
   console.log(`Proxy: Forwarding ${req.method} request to ${targetUrl}`);
