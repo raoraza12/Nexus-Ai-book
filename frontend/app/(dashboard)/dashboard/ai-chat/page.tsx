@@ -5,6 +5,7 @@ import { MessageSquare, Sparkles, Send, User, Bot, Loader2, BookOpen, ChevronDow
 import { cn } from "@/lib/utils";
 import { MASTER_BOOK_ID, MASTER_BOOK_SLUG } from "@/lib/constants";
 import { getApiBaseUrl } from "@/lib/api-config";
+import { createClient } from "@/lib/supabase/client";
 
 interface Message {
   role: "user" | "assistant";
