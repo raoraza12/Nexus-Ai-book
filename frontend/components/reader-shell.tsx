@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Menu, X, ChevronLeft, BookOpen, Layers } from "lucide-react";
+import { Menu, X, ChevronLeft, BookOpen, Layers, Volume2, VolumeX } from "lucide-react";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
@@ -17,6 +17,7 @@ export function ReaderShell({
 }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const hoverTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const handleMouseEnter = () => {
@@ -29,6 +30,31 @@ export function ReaderShell({
       setIsSidebarOpen(false);
     }, 300);
   };
+
+  const toggleSpeech = () => {
+    if (!('speechSynthesis' in window)) return;
+    
+    if (isSpeaking) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+    } else {
+      // Find main content taking out the sidebar and nav
+      const content = document.querySelector('main')?.innerText || "No content found to read.";
+      const utterance = new SpeechSynthesisUtterance(content);
+      utterance.onend = () => setIsSpeaking(false);
+      window.speechSynthesis.speak(utterance);
+      setIsSpeaking(true);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      // Cleanup TTS on unmount
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
 
   return (
     <div className="flex flex-col h-screen bg-slate-50 dark:bg-[#050505] overflow-hidden selection:bg-indigo-500/30">
@@ -56,7 +82,14 @@ export function ReaderShell({
           </div>
         </div>
         
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={toggleSpeech}
+            className="w-10 h-10 flex items-center justify-center rounded-xl text-zinc-500 hover:text-indigo-600 dark:text-zinc-400 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 transition-all"
+            title={isSpeaking ? "Stop Voice" : "Listen to Page"}
+          >
+            {isSpeaking ? <VolumeX size={18} className="animate-pulse text-indigo-500" /> : <Volume2 size={18} />}
+          </button>
           <ThemeToggle />
           <div className="w-8 h-8 rounded-xl bg-indigo-600 flex items-center justify-center text-white text-xs font-black shadow-lg shadow-indigo-500/20 uppercase italic">
              {/* Fallback for avatar */}

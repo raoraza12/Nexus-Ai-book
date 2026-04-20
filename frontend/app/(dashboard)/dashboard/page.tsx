@@ -130,6 +130,29 @@ export default function DashboardPage() {
         </div>
       </section>
 
+      {/* ── Gamification Badges ───────────────────────────────────── */}
+      <section className="space-y-6 animate-in slide-in-from-bottom-6 duration-700 delay-150 fill-mode-both">
+        <div className="flex items-center justify-between px-2">
+           <h2 className="text-xl sm:text-2xl font-[1000] tracking-tighter text-zinc-900 dark:text-zinc-50 uppercase italic">Achievements & Streaks</h2>
+           <span className="text-xs font-black text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 px-3 py-1 rounded-full uppercase border border-indigo-500/20">Level 4 Scholar</span>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+           {[
+             { name: "First Chapter",    desc: "Read your first chapter.", active: true,  icon: "🎯" },
+             { name: "3-Day Streak",     desc: "Read for 3 days straight.", active: true,  icon: "🔥" },
+             { name: "Night Owl",        desc: "Study after midnight.",     active: false, icon: "🦉" },
+             { name: "AI Whisperer",     desc: "Ask 50 questions to AI.",   active: false, icon: "🤖" },
+           ].map(badge => (
+             <div key={badge.name} className={cn("relative p-4 sm:p-5 rounded-3xl border border-zinc-200 dark:border-zinc-800 transition-all", badge.active ? "bg-indigo-50 dark:bg-indigo-500/10 border-indigo-200 dark:border-indigo-500/30 shadow-md" : "bg-white dark:bg-zinc-900/50 opacity-60 grayscale hover:grayscale-0 hover:opacity-100")}>
+                <div className="text-3xl mb-3">{badge.icon}</div>
+                <h3 className="font-bold text-sm text-zinc-900 dark:text-white uppercase tracking-tight">{badge.name}</h3>
+                <p className="text-[10px] sm:text-xs text-zinc-500 mt-1">{badge.desc}</p>
+                {badge.active && <div className="absolute top-4 right-4 w-2 h-2 rounded-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,1)]" />}
+             </div>
+           ))}
+        </div>
+      </section>
+
       {/* ── Library Grid ────────────────────────────────────────── */}
       <section className="space-y-8">
         <div className="flex items-center justify-between px-2">

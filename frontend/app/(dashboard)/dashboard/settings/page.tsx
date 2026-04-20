@@ -16,7 +16,8 @@ import {
   LogOut,
   AppWindow,
   Key,
-  Cpu
+  Cpu,
+  ChevronRight
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useLanguage } from "@/context/language-context";
