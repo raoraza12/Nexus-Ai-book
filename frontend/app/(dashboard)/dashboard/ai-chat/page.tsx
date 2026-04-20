@@ -16,7 +16,24 @@ export default function AIChatPage() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [selectedBook, setSelectedBook] = useState<string>(MASTER_BOOK_ID);
+  const [profile, setProfile] = useState<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const supabase = createClient();
+
+  useEffect(() => {
+    async function loadProfile() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data } = await supabase
+          .from("profiles")
+          .select("ai_model, preferred_persona, context_depth")
+          .eq("id", user.id)
+          .single();
+        setProfile(data);
+      }
+    }
+    loadProfile();
+  }, [supabase]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -41,7 +58,10 @@ export default function AIChatPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           messages: [...messages, userMessage],
-          book_id: selectedBook
+          book_id: selectedBook,
+          model: profile?.ai_model || "gpt-3.5-turbo",
+          persona: profile?.preferred_persona || "academic",
+          context_depth: profile?.context_depth || 5
         }),
       });
 

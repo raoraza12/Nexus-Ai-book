@@ -15,6 +15,9 @@ class ChatMessage(BaseModel):
 class ChatRequest(BaseModel):
     messages: List[ChatMessage]
     book_id: Optional[str] = None
+    model: Optional[str] = "gpt-3.5-turbo"
+    persona: Optional[str] = "academic"
+    context_depth: Optional[int] = 5
 
 @router.post("")
 async def chat_with_agent(
@@ -33,11 +36,29 @@ async def chat_with_agent(
 
     client = openai.AsyncOpenAI(api_key=settings.openai_api_key)
 
+    # Define Personas
+    personas = {
+        "academic": "You are a highly technical, academic AI mentor. Focus on engineering deep-dives, architectural integrity, and precise terminology.",
+        "creative": "You are a creative AI explorer. Focus on analogies, future implications, and connecting disparate concepts from the book content.",
+        "mentor": "You are an empathetic learning mentor. Break down complex topics into digestible parts, offer encouragement, and guide the user through the curriculum.",
+        "concise": "You are a high-efficiency intelligence core. Provide ultra-concise, bulleted insights without fluff."
+    }
+
+    system_prompt = personas.get(request.persona, personas["academic"])
+    system_prompt += " You are the Nexus Core Intelligence. You have deep knowledge of the book content provided in the context."
+
+    # Limit history based on context_depth
+    chat_history = request.messages[-(request.context_depth * 2):] if request.context_depth else request.messages
+    
+    messages = [{"role": "system", "content": system_prompt}]
+    messages.extend([{"role": m.role, "content": m.content} for m in chat_history])
+
     try:
         response = await client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[{"role": m.role, "content": m.content} for m in request.messages],
-            max_tokens=500,
+            model=request.model or "gpt-3.5-turbo",
+            messages=messages,
+            max_tokens=600,
+            temperature=0.7,
         )
         return {"role": "assistant", "content": response.choices[0].message.content}
     except openai.AuthenticationError:

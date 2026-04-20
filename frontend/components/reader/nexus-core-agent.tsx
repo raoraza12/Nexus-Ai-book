@@ -17,6 +17,8 @@ import {
 import { cn } from "@/lib/utils";
 import { getApiBaseUrl } from "@/lib/api-config";
 
+import { createClient } from "@/lib/supabase/client";
+
 interface Message {
   role: "user" | "assistant";
   content: string;
@@ -32,7 +34,9 @@ export function NexusCoreAgent({ bookId, currentContent }: NexusCoreAgentProps) 
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [profile, setProfile] = useState<any>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const supabase = createClient();
 
   // Load history from localStorage
   useEffect(() => {
@@ -45,6 +49,22 @@ export function NexusCoreAgent({ bookId, currentContent }: NexusCoreAgentProps) 
       }
     }
   }, [bookId]);
+
+  // Fetch profile settings
+  useEffect(() => {
+    async function loadProfile() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data } = await supabase
+          .from("profiles")
+          .select("ai_model, preferred_persona, context_depth")
+          .eq("id", user.id)
+          .single();
+        setProfile(data);
+      }
+    }
+    loadProfile();
+  }, [supabase]);
 
   // Save history to localStorage
   useEffect(() => {
@@ -86,10 +106,13 @@ User is reading this chapter and has a question: ${input}`;
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           messages: [
-            ...messages.slice(-5), // Keep last 5 messages for history
+            ...messages.slice(-(profile?.context_depth || 5)), 
             { role: "user", content: contextPrompt }
           ],
-          book_id: bookId
+          book_id: bookId,
+          model: profile?.ai_model || "gpt-3.5-turbo",
+          persona: profile?.preferred_persona || "academic",
+          context_depth: profile?.context_depth || 5
         }),
       });
 
