@@ -28,6 +28,7 @@ export default function ChapterPage({
 
   const [displayMarkdown, setDisplayMarkdown] = useState(content.markdown);
   const [localTranslating, setLocalTranslating] = useState(false);
+  const [translationError, setTranslationError] = useState<string | null>(null);
 
   useEffect(() => {
     async function translate() {
@@ -37,6 +38,7 @@ export default function ChapterPage({
       }
 
       setLocalTranslating(true);
+      setTranslationError(null);
       setIsTranslating(true);
       try {
         const { getApiBaseUrl } = await import("@/lib/api-config");
@@ -49,12 +51,19 @@ export default function ChapterPage({
             target_lang: language,
           }),
         });
+
+        if (!response.ok) {
+           const errorData = await response.json().catch(() => ({}));
+           throw new Error(errorData.detail || "Neural link timeout. Please retry.");
+        }
+
         const data = await response.json();
         if (data.translated_text) {
           setDisplayMarkdown(data.translated_text);
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error("Translation error:", err);
+        setTranslationError(err.message || "Failed to connect to Neural Core.");
       } finally {
         setLocalTranslating(false);
         setIsTranslating(false);
@@ -92,6 +101,21 @@ export default function ChapterPage({
                 <span className="text-sm font-black text-zinc-900 dark:text-white uppercase italic tracking-widest">Nexus Neural Core: Translating...</span>
               </div>
             </div>
+          )}
+
+          {translationError && (
+             <div className="mb-8 p-6 bg-red-50 dark:bg-red-950/20 border-2 border-red-200 dark:border-red-900/30 rounded-3xl flex flex-col items-center text-center gap-4 animate-in slide-in-from-top-4">
+                <div className="text-red-600 font-black uppercase text-xs tracking-widest italic flex items-center gap-2">
+                   <Sparkles size={16} /> Neural Link Error
+                </div>
+                <p className="text-sm font-bold text-red-500/80">{translationError}</p>
+                <button 
+                  onClick={() => window.location.reload()}
+                  className="px-6 py-2 bg-red-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-700 transition-all shadow-lg shadow-red-600/20"
+                >
+                  Reconnect Neural Link
+                </button>
+             </div>
           )}
 
           <div className={cn(

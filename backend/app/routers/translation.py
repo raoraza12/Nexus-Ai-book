@@ -24,25 +24,35 @@ async def translate_text(request: TranslationRequest):
         paragraphs = request.text.split("\n\n")
         translated_paragraphs = []
         
-        current_chunk = ""
-        max_chunk_size = 3500 # Safer limit
+        max_chunk_size = 3000 # More conservative limit for stability
         
         for p in paragraphs:
-            if len(current_chunk) + len(p) < max_chunk_size:
-                current_chunk += p + "\n\n"
+            # If a single paragraph is too large, split it further by single newlines or sentences
+            if len(p) > max_chunk_size:
+                sub_chunks = []
+                words = p.split(' ')
+                current_sub = ""
+                for word in words:
+                    if len(current_sub) + len(word) < max_chunk_size:
+                        current_sub += word + " "
+                    else:
+                        sub_chunks.append(current_sub.strip())
+                        current_sub = word + " "
+                if current_sub:
+                    sub_chunks.append(current_sub.strip())
+                
+                translated_sub = [translator.translate(sc) for sc in sub_chunks if sc.strip()]
+                translated_paragraphs.append(" ".join(translated_sub))
             else:
-                if current_chunk:
-                    translated_paragraphs.append(translator.translate(current_chunk.strip()))
-                current_chunk = p + "\n\n"
-        
-        if current_chunk:
-            translated_paragraphs.append(translator.translate(current_chunk.strip()))
+                if p.strip():
+                    translated_paragraphs.append(translator.translate(p.strip()))
             
         translated_text = "\n\n".join(translated_paragraphs)
         return TranslationResponse(translated_text=translated_text)
     except Exception as e:
-        print(f"Translation Error: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"AI Translation Service Error: {str(e)}")
+        error_msg = f"Neural Translation Error: {str(e)}"
+        print(error_msg)
+        raise HTTPException(status_code=500, detail=error_msg)
 
 @router.get("/languages")
 async def get_supported_languages():
