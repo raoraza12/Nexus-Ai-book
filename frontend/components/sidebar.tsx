@@ -46,7 +46,7 @@ export function Sidebar({ isAdmin, isMobileOpen, collapsed = false, onCollapse }
   return (
     <aside className={cn("sidebar", collapsed && "sidebar-collapsed", isMobileOpen && "sidebar-mobile-open")}>
       {/* Logo */}
-      <a href="/" className="sidebar-logo group cursor-pointer border-b border-zinc-100 dark:border-zinc-800/50 mb-2">
+      <Link href="/" className="sidebar-logo group cursor-pointer border-b border-zinc-100 dark:border-zinc-800/50 mb-2">
         <div className="sidebar-logo-icon group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-xl shadow-indigo-600/20">
           <BookOpen size={22} />
         </div>
@@ -55,7 +55,7 @@ export function Sidebar({ isAdmin, isMobileOpen, collapsed = false, onCollapse }
             Nexus Ai
           </span>
         )}
-      </a>
+      </Link>
 
       {/* Navigation */}
       <nav className="sidebar-nav" aria-label="Main navigation">
