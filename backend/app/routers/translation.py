@@ -12,7 +12,8 @@ class TranslationRequest(BaseModel):
 class TranslationResponse(BaseModel):
     translated_text: str
 
-@router.post("/translate", response_model=TranslationResponse)
+@router.post("/translate")
+@router.post("/translate/")
 async def translate_text(request: TranslationRequest):
     if not request.text.strip():
         return TranslationResponse(translated_text="")

@@ -20,6 +20,7 @@ class ChatRequest(BaseModel):
     context_depth: Optional[int] = 5
 
 @router.post("")
+@router.post("/")
 async def chat_with_agent(
     request: ChatRequest,
     settings: Settings = Depends(get_settings)

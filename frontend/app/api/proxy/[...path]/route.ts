@@ -7,19 +7,19 @@ async function handler(req: NextRequest, context: any) {
   const path: string[] = params.path || [];
   let pathStr = path.join("/");
   
-  // Important: If the original URL had a trailing slash, preserve it
+  // Base targets for the probe
+  const targets = [
+    `${BACKEND_URL}/${pathStr}`,
+    `${BACKEND_URL}/api/${pathStr}` // Some Vercel configs prepend /api
+  ];
+
+  // If original had a trailing slash, add it to both
   if (req.nextUrl.pathname.endsWith("/")) {
-    pathStr += "/";
+    targets[0] += "/";
+    targets[1] += "/";
   }
-  
-  const targetUrl = `${BACKEND_URL}/${pathStr}`;
-  console.log(`Proxy: Forwarding ${req.method} request to ${targetUrl}`);
 
-  // Forward search params
-  const searchParams = req.nextUrl.searchParams.toString();
-  const fullUrl = searchParams ? `${targetUrl}?${searchParams}` : targetUrl;
-
-  // Filter out host headers that might interfere with Vercel
+  // Header Filtering
   const headers = new Headers();
   req.headers.forEach((value, key) => {
     if (!["host", "connection", "origin", "referer"].includes(key.toLowerCase())) {
@@ -27,35 +27,47 @@ async function handler(req: NextRequest, context: any) {
     }
   });
 
-  let body: string | undefined;
-  if (req.method !== "GET" && req.method !== "HEAD") {
-    body = await req.text();
+  const body = req.method !== "GET" && req.method !== "HEAD" ? await req.text() : undefined;
+
+  let lastResponse: Response | null = null;
+
+  for (const targetUrl of targets) {
+    try {
+      console.log(`Proxy: Probing ${req.method} -> ${targetUrl}`);
+      const response = await fetch(targetUrl, {
+        method: req.method,
+        headers: headers,
+        body: body,
+        redirect: "follow",
+      });
+
+      // If we get a valid successful response OR a semantic error (like 422, 401, 500 from the app)
+      // we return it. We only skip if it's a 405/404 which might indicate a routing mismatch.
+      if (response.ok || ![404, 405].includes(response.status)) {
+        const data = await response.json().catch(() => ({}));
+        return NextResponse.json(data, {
+          status: response.status,
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization",
+          },
+        });
+      }
+      lastResponse = response;
+    } catch (error) {
+      console.error(`Proxy: Probe failed for ${targetUrl}`, error);
+    }
   }
 
-  try {
-    const backendResponse = await fetch(fullUrl, {
-      method: req.method,
-      headers: headers,
-      body: body || undefined,
-    });
-
-    const data = await backendResponse.json().catch(() => ({}));
-
-    return NextResponse.json(data, {
-      status: backendResponse.status,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization",
-      },
-    });
-  } catch (error: any) {
-    console.error("Proxy Error:", error);
-    return NextResponse.json(
-      { detail: `Proxy Error: ${error.message}` },
-      { status: 502 }
-    );
-  }
+  // If all probes failed to find a valid route
+  const status = lastResponse?.status || 502;
+  const finalMsg = lastResponse ? `Backend error (${lastResponse.status})` : "Gateway timeout or unreachable backend";
+  
+  return NextResponse.json(
+    { detail: `Nexus Neural Error: ${finalMsg}. Path probed: ${targets.join(" | ")}` },
+    { status: status }
+  );
 }
 
 export async function GET(req: NextRequest, context: { params: Promise<{ path: string[] }> }) {
