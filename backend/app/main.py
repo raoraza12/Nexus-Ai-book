@@ -11,6 +11,7 @@ app = FastAPI(
     description="Production-ready FastAPI backend for AI Book Platform",
     docs_url="/docs" if settings.debug else None,
     redoc_url="/redoc" if settings.debug else None,
+    redirect_slashes=False, # Prevent POST -> GET redirects which cause 405 errors
 )
 
 # ── CORS ──────────────────────────────────────────────────────────────────────

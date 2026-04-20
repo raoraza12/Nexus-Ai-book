@@ -4,30 +4,38 @@ const BACKEND_URL = "https://nexus-ai-api.vercel.app";
 
 async function handler(req: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
   const { path } = await params;
-  const pathStr = path.join("/");
+  let pathStr = path.join("/");
   
-  // Build the target URL - path already includes "api/v1/..."
+  // Ensure the internal /api/v1 prefix is preserved correctly
+  // If the backend expects /api/v1/... then pathStr should already have it
+  // if called as /api/proxy/api/v1/...
+  
   const targetUrl = `${BACKEND_URL}/${pathStr}`;
+  console.log(`Proxy: Forwarding ${req.method} request to ${targetUrl}`);
 
-  // Forward search params if any
+  // Forward search params
   const searchParams = req.nextUrl.searchParams.toString();
   const fullUrl = searchParams ? `${targetUrl}?${searchParams}` : targetUrl;
 
-  // Read the body for non-GET requests
+  // Filter out host headers that might interfere with Vercel
+  const headers = new Headers();
+  req.headers.forEach((value, key) => {
+    if (!["host", "connection", "origin", "referer"].includes(key.toLowerCase())) {
+      headers.set(key, value);
+    }
+  });
+
   let body: string | undefined;
   if (req.method !== "GET" && req.method !== "HEAD") {
     body = await req.text();
   }
 
-  // Forward the request to the backend
-  const backendResponse = await fetch(fullUrl, {
-    method: req.method,
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-    body: body || undefined,
-  });
+  try {
+    const backendResponse = await fetch(fullUrl, {
+      method: req.method,
+      headers: headers,
+      body: body || undefined,
+    });
 
   const data = await backendResponse.json().catch(() => ({}));
 

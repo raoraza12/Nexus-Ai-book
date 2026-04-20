@@ -117,8 +117,14 @@ User is reading this chapter and has a question: ${input}`;
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail || `Neural Link Error: ${response.status} ${response.statusText}`);
+        let errorDetail = "";
+        try {
+          const errorData = await response.json();
+          errorDetail = errorData.detail || errorData.message || JSON.stringify(errorData);
+        } catch (e) {
+          errorDetail = await response.text().catch(() => "Unknown server error");
+        }
+        throw new Error(`Neural Link Error (${response.status}): ${errorDetail.substring(0, 100)}`);
       }
 
       const data = await response.json();
