@@ -8,12 +8,12 @@ export default function BooksPage() {
           <h1 className="page-title">My Library</h1>
           <p className="page-subtitle">Manage and read your collection of books.</p>
         </div>
-        <div className="flex gap-3">
-          <div className="relative">
+        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto mt-4 sm:mt-0">
+          <div className="relative w-full sm:w-64">
              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
-             <input type="text" placeholder="Search library..." className="pl-10 pr-4 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+             <input type="text" placeholder="Search library..." className="w-full pl-10 pr-4 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
           </div>
-          <button className="btn-secondary">
+          <button className="btn-secondary w-full sm:w-auto flex items-center justify-center gap-2">
             <Filter size={16} />
             Filter
           </button>

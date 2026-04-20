@@ -14,12 +14,14 @@ export default function DashboardLayout({
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const router = useRouter();
   const supabase = createClient();
 
   useEffect(() => {
     async function getData() {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       if (!user) {
         router.push("/login");
         return;
@@ -49,7 +51,12 @@ export default function DashboardLayout({
 
   return (
     <div className="dashboard-wrapper">
-      <Sidebar isAdmin={isAdmin} isMobileOpen={isMobileOpen} />
+      <Sidebar 
+        isAdmin={isAdmin} 
+        isMobileOpen={isMobileOpen} 
+        collapsed={isCollapsed}
+        onCollapse={setIsCollapsed}
+      />
       {/* Overlay for mobile */}
       {isMobileOpen && (
         <div 
@@ -58,7 +65,11 @@ export default function DashboardLayout({
         />
       )}
       <div className="dashboard-main">
-        <TopNav user={userData} onMenuClick={() => setIsMobileOpen(true)} />
+        <TopNav 
+          user={userData} 
+          onMenuClick={() => setIsMobileOpen(true)}
+          isCollapsed={isCollapsed}
+        />
         <main className="dashboard-content" onClick={() => setIsMobileOpen(false)}>{children}</main>
       </div>
     </div>

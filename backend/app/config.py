@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     supabase_anon_key: str
     supabase_service_role_key: str
     supabase_jwt_secret: str
+    openai_api_key: str = ""
 
     # App
     app_name: str = "AI Book Platform API"

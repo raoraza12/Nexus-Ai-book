@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -20,7 +20,7 @@ import { ShieldAlert } from "lucide-react";
 import { MASTER_BOOK_SLUG } from "@/lib/constants";
 
 const NAV_ITEMS = [
-  { href: "/", icon: Home, label: "Home" },
+  { href: "/dashboard", icon: Home, label: "Home" },
   { href: `/reader/${MASTER_BOOK_SLUG}/1`, icon: BookMarked, label: "Start Reading" },
   { href: "/dashboard/progress", icon: BarChart2, label: "My Progress" },
   { href: "/dashboard/ai-chat", icon: MessageSquare, label: "Ask AI Agent" },
@@ -31,10 +31,11 @@ const NAV_ITEMS = [
 interface SidebarProps {
   isAdmin?: boolean;
   isMobileOpen?: boolean;
+  collapsed?: boolean;
+  onCollapse?: (collapsed: boolean) => void;
 }
 
-export function Sidebar({ isAdmin, isMobileOpen }: SidebarProps) {
-  const [collapsed, setCollapsed] = useState(false);
+export function Sidebar({ isAdmin, isMobileOpen, collapsed = false, onCollapse }: SidebarProps) {
   const pathname = usePathname();
 
   const items = [...NAV_ITEMS];
@@ -45,12 +46,16 @@ export function Sidebar({ isAdmin, isMobileOpen }: SidebarProps) {
   return (
     <aside className={cn("sidebar", collapsed && "sidebar-collapsed", isMobileOpen && "sidebar-mobile-open")}>
       {/* Logo */}
-      <div className="sidebar-logo">
-        <div className="sidebar-logo-icon">
+      <a href="/" className="sidebar-logo group cursor-pointer border-b border-zinc-100 dark:border-zinc-800/50 mb-2">
+        <div className="sidebar-logo-icon group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-xl shadow-indigo-600/20">
           <BookOpen size={22} />
         </div>
-        {!collapsed && <span className="sidebar-logo-text">Nexus Ai</span>}
-      </div>
+        {!collapsed && (
+          <span className="sidebar-logo-text bg-gradient-to-r from-zinc-900 to-zinc-500 dark:from-white dark:to-zinc-400 bg-clip-text text-transparent">
+            Nexus Ai
+          </span>
+        )}
+      </a>
 
       {/* Navigation */}
       <nav className="sidebar-nav" aria-label="Main navigation">
@@ -79,7 +84,7 @@ export function Sidebar({ isAdmin, isMobileOpen }: SidebarProps) {
 
       {/* Collapse toggle */}
       <button
-        onClick={() => setCollapsed(!collapsed)}
+        onClick={() => onCollapse?.(!collapsed)}
         className="sidebar-collapse-btn"
         aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         id="sidebar-collapse-toggle"
