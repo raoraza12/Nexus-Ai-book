@@ -41,9 +41,7 @@ export default function ChapterPage({
       setTranslationError(null);
       setIsTranslating(true);
       try {
-        const { getApiBaseUrl } = await import("@/lib/api-config");
-        const baseUrl = getApiBaseUrl();
-        const response = await fetch(`${baseUrl}/api/v1/translate`, {
+        const response = await fetch("/api/translate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

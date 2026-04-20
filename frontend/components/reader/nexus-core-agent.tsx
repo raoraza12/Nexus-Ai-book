@@ -98,10 +98,9 @@ ${currentContent.substring(0, 3000)}
 ---
 User is reading this chapter and has a question: ${input}`;
 
-      const baseUrl = getApiBaseUrl();
-      console.log(`Nexus Core: Connecting to ${baseUrl}/api/v1/chat...`);
+      console.log(`Nexus Core: Connecting to integrated local circuit...`);
       
-      const response = await fetch(`${baseUrl}/api/v1/chat`, {
+      const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
