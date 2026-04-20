@@ -148,7 +148,7 @@ User is reading this chapter and has a question: ${input}`;
             initial={{ opacity: 0, scale: 0.9, y: 20, transformOrigin: "bottom right" }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="w-[90vw] sm:w-[400px] h-[500px] sm:h-[600px] bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden glass"
+            className="w-[90vw] sm:w-[400px] h-auto max-h-[calc(100vh-120px)] sm:h-[600px] bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden glass"
           >
             {/* Header */}
             <div className="p-6 bg-indigo-600 dark:bg-indigo-600/20 text-white flex items-center justify-between shrink-0">
