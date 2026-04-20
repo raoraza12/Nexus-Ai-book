@@ -7,9 +7,10 @@ export const getApiBaseUrl = () => {
     return 'http://127.0.0.1:8000';
   }
 
-  if (process.env.NEXT_PUBLIC_API_URL) {
-    return process.env.NEXT_PUBLIC_API_URL;
+  if (isLocalhost) {
+    return 'http://127.0.0.1:8000';
   }
-  
-  return 'https://nexus-ai-api.vercel.app'; // Default production fallback
+
+  // Use relative path for production to leverage Vercel rewrites and bypass CORS
+  return '/api/backend';
 };

@@ -23,7 +23,6 @@ const NAV_ITEMS = [
   { href: "/dashboard", icon: Home, label: "Home" },
   { href: `/reader/${MASTER_BOOK_SLUG}/1`, icon: BookMarked, label: "Start Reading" },
   { href: "/dashboard/progress", icon: BarChart2, label: "My Progress" },
-  { href: "/dashboard/ai-chat", icon: MessageSquare, label: "Ask AI Agent" },
   { href: "/dashboard/learn", icon: GraduationCap, label: "Labs & Quizzes" },
   { href: "/dashboard/settings", icon: Settings, label: "Settings" },
 ];

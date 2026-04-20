@@ -16,7 +16,7 @@ app = FastAPI(
 # ── CORS ──────────────────────────────────────────────────────────────────────
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"] if settings.debug else settings.cors_origins_list,
+    allow_origins=["*"], # Allowing all origins to ensure Vercel proxying and external calls work flawlessly
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

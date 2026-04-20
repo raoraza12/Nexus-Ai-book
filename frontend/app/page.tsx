@@ -134,7 +134,7 @@ export default async function LandingPage() {
             {FEATURES.map((feature, i) => {
               const Icon = feature.icon;
               return (
-                <div key={i} className="group flex flex-col p-8 sm:p-10 rounded-[2.5rem] bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 hover:border-indigo-500/50 hover:shadow-2xl transition-all duration-500">
+                <div key={i} className="group flex flex-col p-8 sm:p-10 rounded-[2.5rem] bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 hover:border-indigo-500/50 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:scale-[1.02]">
                   <div className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-8 group-hover:scale-110 group-hover:bg-indigo-600 group-hover:text-white transition-all shadow-sm">
                     <Icon size={28} />
                   </div>
