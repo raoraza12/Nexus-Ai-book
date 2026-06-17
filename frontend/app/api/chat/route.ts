@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "llama-3.3-70b-specdec",
+        model: "llama-3.3-70b-versatile",
         messages: formattedMessages,
         max_tokens: 1024,
         temperature: 0.7,
