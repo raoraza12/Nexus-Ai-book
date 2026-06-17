@@ -90,48 +90,55 @@ export function NexusCoreAgent({ bookId, currentContent }: NexusCoreAgentProps) 
     setIsLoading(true);
 
     try {
-      // Create a context-aware prompt
-      const contextPrompt = `
-Context from current book page:
----
-${currentContent.substring(0, 3000)} 
----
-User is reading this chapter and has a question: ${input}`;
-
-      console.log(`Nexus Core: Connecting to integrated local circuit...`);
+      // Build messages array with book context as a separate context message
+      const contextDepth = profile?.context_depth || 5;
+      const recentHistory = messages.slice(-(contextDepth * 2));
       
+      // Add book context as a system-level context message, separate from user's question
+      const messagesForApi: { role: string; content: string }[] = [];
+      
+      if (currentContent && currentContent.trim().length > 0) {
+        messagesForApi.push({
+          role: "user",
+          content: `[BOOK CONTEXT - Use this as reference if the question is related]\n${currentContent.substring(0, 3000)}`
+        });
+        messagesForApi.push({
+          role: "assistant", 
+          content: "I have the book context loaded. Feel free to ask me anything — about this chapter or any other topic!"
+        });
+      }
+
+      // Add conversation history
+      messagesForApi.push(
+        ...recentHistory.map(m => ({ role: m.role, content: m.content }))
+      );
+
+      // Add current user message
+      messagesForApi.push({ role: "user", content: input });
+
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          messages: [
-            ...messages.slice(-(profile?.context_depth || 5)), 
-            { role: "user", content: contextPrompt }
-          ],
+          messages: messagesForApi,
           book_id: bookId,
-          model: profile?.ai_model || "gpt-3.5-turbo",
           persona: profile?.preferred_persona || "academic",
-          context_depth: profile?.context_depth || 5
+          context_depth: contextDepth
         }),
       });
 
-      if (!response.ok) {
-        let errorDetail = "";
-        try {
-          const errorData = await response.json();
-          errorDetail = errorData.detail || errorData.message || JSON.stringify(errorData);
-        } catch (e) {
-          errorDetail = await response.text().catch(() => "Unknown server error");
-        }
-        throw new Error(`Neural Link Error (${response.status}): ${errorDetail.substring(0, 100)}`);
-      }
-
       const data = await response.json();
-      setMessages((prev) => [...prev, { role: "assistant", content: data.content || "Neural links unstable. Please retry." }]);
+      
+      if (data.content) {
+        setMessages((prev) => [...prev, { role: "assistant", content: data.content }]);
+      } else if (data.detail) {
+        setMessages((prev) => [...prev, { role: "assistant", content: data.detail }]);
+      } else {
+        setMessages((prev) => [...prev, { role: "assistant", content: "Sorry, I couldn't process that. Please try again." }]);
+      }
     } catch (error: any) {
-      console.error("Nexus Core Error:", error);
-      const errorMsg = error.message || "Edge Protocol Error: Could not connect to Nexus Brain.";
-      setMessages((prev) => [...prev, { role: "assistant", content: errorMsg }]);
+      console.error("Chat Error:", error);
+      setMessages((prev) => [...prev, { role: "assistant", content: "Connection error. Please check your internet and try again." }]);
     } finally {
       setIsLoading(false);
     }
